@@ -108,7 +108,7 @@ class ConfigRepository
      */
     public function get($key, $default = self::_UNSPECIFIED, array $args = null)
     {
-        if (array_key_exists($key, $this->caches)) return $this->caches;
+        if (array_key_exists($key, $this->caches)) return $this->caches[$key];
 
         $scope = &$this->resolve($key, $path);
         if (static::isArrayLike($scope)) {
@@ -199,6 +199,7 @@ class ConfigRepository
      */
     public function &resolve($key, &$lastPath = null, $create = false)
     {
+        $false = false;
         $key = (string)$key;
         $paths = ($key === '') ? [] : explode($this->pathSeparator, $key);
         $scope = &$this->items;
@@ -208,16 +209,16 @@ class ConfigRepository
                 if ( ! static::isArrayLike($scope)) $scope = [];
                 if ( ! array_key_exists($path, $scope)) $scope[$path] = null;
             } else {
-                if ( ! static::isArrayLike($scope)) return false;
-                if ( ! array_key_exists($path, $scope)) return false;
+                if ( ! static::isArrayLike($scope)) return $false;
+                if ( ! array_key_exists($path, $scope)) return $false;
             }
-            if (count($paths) === 1) {
+            if (!count($paths)) {
                 $lastPath = $path;
                 return $scope;
             }
             $scope = &$scope[$path];
         }
-        return false;
+        return $false;
     }
 
     /**
