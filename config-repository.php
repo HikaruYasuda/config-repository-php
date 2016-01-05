@@ -140,6 +140,11 @@ class ConfigRepository
     public function set($key, $value)
     {
         $scope = &$this->resolve($key, $path, true);
+        if (!static::isArrayLike($scope)) {
+            $func = __METHOD__;
+            $type = gettype($key);
+            throw new InvalidArgumentException("Argument 1 passed to $func must be a string, $type given.");
+        }
         $scope[$path] = $value;
     }
 
