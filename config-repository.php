@@ -112,14 +112,7 @@ class ConfigRepository
 
         $scope = &$this->resolve($key, $path);
         if (static::isArrayLike($scope)) {
-            $val = $scope[$path];
-            if (is_a($val, self::LAZY_VAL_CLASS)) {
-                $obj = $val;
-                $val = call_user_func_array($obj->func, $obj->args);
-                if ($obj->always) return $val;
-                $scope[$path] = $val;
-            }
-            return $this->caches[(string)$key] = $val;
+            return $this->caches[(string)$key] = $scope[$path];
         }
         if (is_callable($default)) {
             return call_user_func_array($default, (array)$args);
@@ -166,8 +159,8 @@ class ConfigRepository
         $class = self::LAZY_VAL_CLASS;
         $obj = new $class;
         $obj->func = $func;
-        $obj->args = $args;
-        $obj->always = !!$always;
+        $obj->args = (array)$args;
+        $obj->always = (bool)$always;
         $scope[$path] = $obj;
     }
 
@@ -216,6 +209,16 @@ class ConfigRepository
             } else {
                 if ( ! static::isArrayLike($scope)) return $false;
                 if ( ! array_key_exists($path, $scope)) return $false;
+            }
+            if (is_a($scope[$path], self::LAZY_VAL_CLASS)) {
+                $obj = $scope[$path];
+                $val = call_user_func_array($obj->func, $obj->args);
+                if ($obj->always) {
+                    unset($scope);
+                    $scope = [$path => &$val];
+                } else {
+                    $scope[$path] = $val;
+                }
             }
             if (!count($paths)) {
                 $lastPath = $path;
