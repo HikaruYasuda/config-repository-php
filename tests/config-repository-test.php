@@ -84,7 +84,6 @@ class ConfigRepositoryTest extends PHPUnit_Framework_TestCase
         $this->assertArrayHasKey('book', $this->conf->get('db.options.tables'));
         $this->assertEquals('VARCHAR(50)', $this->conf->get('db.options.tables.book.columns.author'));
         $this->assertNull($this->conf->get('db.options.tables.author'));
-        $this->assertNull($this->conf->get('db.options.tables.author', ConfigRepository::_UNSPECIFIED));
         $this->assertEquals('__default__', $this->conf->get('db.options.tables.author', '__default__'));
         $this->assertEquals('__custom__', $this->conf->get('db.options.tables.author', function($a, $b, $c) {
             return "$a$b$c";
